@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Analytics | WealthWise</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h2>📈 Monthly Analytics Dashboard</h2>
+
+    <!-- Line Chart -->
+    <canvas id="lineChart" style="margin: 30px auto; width: 100%; max-width: 800px; height: 300px;"></canvas>
+
+    <!-- Pie Chart -->
+<div style="width: 250px; height: 250px; margin: 0 auto;">
+  <canvas id="pieChart"></canvas>
+</div>
+
+
+    <!-- Radial Chart (Savings vs Goal) -->
+    <div style="width: 250px; height: 250px; margin: 0 auto;">
+      <canvas id="doughnutChart" width="100" height="100"></canvas>
+    </div>
+
+    <a href="{{ url_for('dashboard') }}" class="btn">⬅️ Back to Dashboard</a>
+  </div>
+
+  <script>
+    // Line Chart: Expense over Dates
+    const lineCtx = document.getElementById("lineChart").getContext("2d");
+    const lineChart = new Chart(lineCtx, {
+      type: "line",
+      data: {
+        labels: {{ by_date.keys() | list | tojson }},
+        datasets: [{
+          label: "Daily Expenses",
+          data: {{ by_date.values() | list | tojson }},
+          fill: false,
+          borderColor: "purple",
+          tension: 0.3
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+
+    // Pie Chart: Expense by Category
+    const pieCtx = document.getElementById("pieChart").getContext("2d");
+const pieChart = new Chart(pieCtx, {
+  type: "pie",
+  data: {
+    labels: {{ categories | tojson }},
+    datasets: [{
+      label: "Category-wise Expenses",
+      data: {{ amounts | tojson }},
+      backgroundColor: [
+        "#7e57c2", "#ba68c8", "#9575cd",
+        "#ce93d8", "#b39ddb", "#e1bee7"
+      ],
+      borderWidth: 1
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false, // ✅ this allows resizing inside the container
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          color: 'white' // optional: if you use dark backgrounds
+        }
+      }
+    }
+  }
+});
+
+    // Doughnut Chart: Savings vs Extra Spendable
+    const doughnutCtx = document.getElementById("doughnutChart").getContext("2d");
+const doughnutChart = new Chart(doughnutCtx, {
+  type: "doughnut",
+  data: {
+    labels: ["Savings Goal", "Extra Spendable"],
+    datasets: [{
+      data: {{ savings | tojson }},
+      backgroundColor: ["#4caf50", "#9c27b0"]
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false, // ✅ allows it to follow the container size
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          color: 'white' // optional, for dark mode compatibility
+        }
+      }
+    }
+  }
+});
+
+  </script>
+</body>
+</html>
